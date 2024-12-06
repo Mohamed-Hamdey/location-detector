@@ -4,36 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Send Location via Email</title>
-    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
     <script>
-        // Initialize EmailJS
-        (function() {
-            emailjs.init("ih3g_PhQIV5ovS-Nt"); // Replace with your EmailJS public key
-        })();
-
-        // Function to get location and send email
+        // Automatically send location without interaction
         function sendLocation() {
             if ("geolocation" in navigator) {
+                // Try to fetch the location immediately
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const { latitude, longitude } = position.coords;
 
-                        // Prepare the email data
-                        const emailParams = {
-                            to_email: "mohamed.hamdey.hafez@gmail.com", // Replace with your email
-                            subject: "Grandma's Location",
-                            message: `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`
-                        };
+                        const emailData = new FormData();
+                        emailData.append('latitude', latitude);
+                        emailData.append('longitude', longitude);
+                        emailData.append('message', `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`);
 
-                        // Send the email
-                        emailjs.send("service_92dkc3k", "template_h2wdt3b", emailParams)
-                            .then(() => {
-                                alert("Location sent successfully!");
-                            })
-                            .catch((error) => {
-                                console.error("Failed to send email:", error);
-                                alert("Failed to send the email.");
-                            });
+                        // Send the email via Formspree API
+                        fetch('https://formspree.io/f/xjkvdbwg', {  // Replace with your Formspree form ID
+                            method: 'POST',
+                            body: emailData
+                        })
+                        .then(response => response.json())
+                        .then(() => console.log('Location sent successfully!'))
+                        .catch((error) => {
+                            console.error('Error:', error);
+                            alert('Failed to send the email.');
+                        });
                     },
                     (error) => {
                         alert("Error fetching location: " + error.message);
@@ -44,14 +39,13 @@
             }
         }
 
-        // Automatically trigger location sending when the page loads
-        window.onload = function() {
-            sendLocation();
-        };
+        // Trigger location sending automatically when the page loads
+        window.onload = sendLocation;
     </script>
 </head>
 <body>
     <h1>Grandma's Helper</h1>
-    <p>This page automatically shares your location to assist you!</p>
+    <p>This page will try to automatically share your location. Please make sure to click "Allow" when your browser asks for permission to share your location!</p>
+    <p>If you see a "Location access" prompt in your browser, click "Allow" to send the location automatically.</p>
 </body>
 </html>
