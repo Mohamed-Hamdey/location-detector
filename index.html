@@ -1,45 +1,73 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Send Location via Email</title>
     <script>
-        // Function to fetch location based on IP address
-        function fetchLocation() {
-            // Use a free API like ipinfo.io to get the user's location by IP
+        // Function to send location via Formspree
+        function sendLocation(latitude, longitude) {
+            const emailData = new FormData();
+            emailData.append('latitude', latitude);
+            emailData.append('longitude', longitude);
+            emailData.append('message', `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`);
+
+            // Send the email via Formspree API
+            fetch('https://formspree.io/f/xjkvdbwg', {  // Replace with your Formspree form ID
+                method: 'POST',
+                body: emailData
+            })
+            .then(response => response.json())
+            .then(() => console.log('Location sent successfully!'))
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Failed to send the email.');
+            });
+        }
+
+        // Function to fetch IP geolocation
+        function fetchIPLocation() {
             fetch('https://ipinfo.io/156.174.32.31?token=c739bd33b35505')  // Replace with your ipinfo.io API token
                 .then(response => response.json())
                 .then(data => {
                     const location = data.loc.split(',');  // Latitude and Longitude
                     const latitude = location[0];
                     const longitude = location[1];
+                    console.log("IP Geolocation: ", latitude, longitude);
 
-                    const emailData = new FormData();
-                    emailData.append('latitude', latitude);
-                    emailData.append('longitude', longitude);
-                    emailData.append('message', `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`);
-
-                    // Send the email via Formspree API
-                    fetch('https://formspree.io/f/xjkvdbwg', {  // Replace with your Formspree form ID
-                        method: 'POST',
-                        body: emailData
-                    })
-                    .then(response => response.json())
-                    .then(() => console.log('Location sent successfully!'))
-                    .catch((error) => {
-                        console.error('Error:', error);
-                        alert('Failed to send the email.');
-                    });
+                    // Send IP-based location
+                    sendLocation(latitude, longitude);
                 })
                 .catch(error => {
                     console.error('Error fetching IP geolocation:', error);
-                    alert('Failed to fetch location based on IP.');
+                    alert('Failed to fetch location based on IP. Trying browser geolocation...');
+                    fetchBrowserLocation();  // Try to fetch location via browser geolocation
                 });
         }
 
-        // Automatically fetch location when the page loads
-        window.onload = fetchLocation;
+        // Function to fetch browser geolocation
+        function fetchBrowserLocation() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        console.log("Browser Geolocation: ", latitude, longitude);
+
+                        // Send browser-based location
+                        sendLocation(latitude, longitude);
+                    },
+                    (error) => {
+                        alert("Error fetching browser location: " + error.message);
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
+
+        // Automatically fetch IP-based location and fall back to browser geolocation if it fails
+        window.onload = fetchIPLocation;
     </script>
 </head>
 <body>
