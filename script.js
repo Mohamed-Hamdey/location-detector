@@ -12,7 +12,7 @@ document.getElementById("sendLocation").addEventListener("click", () => {
                 const message = `Hi! I am sharing my location: ${mapsLink}`;
 
                 // Generate the WhatsApp link
-                const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                const whatsappLink = `https://wa.me/${+201026692641}?text=${encodeURIComponent(message)}`;
 
                 // Redirect to WhatsApp
                 window.open(whatsappLink, "_blank");
