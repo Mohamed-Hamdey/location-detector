@@ -5,33 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Send Location via Email</title>
     <script>
-        // Function to spoof the location (for testing purposes or fallback)
-        function spoofLocation(latitude, longitude) {
-            // Override geolocation's getCurrentPosition method to return spoofed data
-            Object.defineProperty(navigator.geolocation, 'getCurrentPosition', {
-                value: (successCallback) => successCallback({
-                    coords: { latitude, longitude }
-                }),
-                writable: true,
-            });
-        }
-
-        // Function to send the location
+        // Function to send location when allowed
         function sendLocation() {
             if ("geolocation" in navigator) {
-                // Try to fetch the location immediately
+                // Request permission to access location
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const { latitude, longitude } = position.coords;
 
-                        // Prepare email data
                         const emailData = new FormData();
                         emailData.append('latitude', latitude);
                         emailData.append('longitude', longitude);
-                        emailData.append('message', `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`);
+                        emailData.append('message', `Location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`);
 
-                        // Send the email via Formspree API
-                        fetch('https://formspree.io/f/xjkvdbwg', {  // Replace with your Formspree form ID
+                        // Send the location via Formspree
+                        fetch('https://formspree.io/f/xjkvdbwg', {
                             method: 'POST',
                             body: emailData
                         })
@@ -43,13 +31,7 @@
                         });
                     },
                     (error) => {
-                        // Handle geolocation error (e.g., permission denied)
-                        console.error("Error fetching location:", error);
                         alert("Error fetching location: " + error.message);
-
-                        // If permission is denied, spoof location
-                        spoofLocation(40.7128, -74.0060);  // Example: New York City coordinates
-                        sendLocation();  // Retry sending with spoofed location
                     }
                 );
             } else {
@@ -57,13 +39,13 @@
             }
         }
 
-        // Automatically check permissions and send location when the page loads
-        window.onload = function() {
-            sendLocation();
-        };
+        // Trigger location sending when the page loads
+        window.onload = sendLocation;
     </script>
 </head>
 <body>
-    <h1>Hello world</h1>
+    <h1>Location Sharing Helper</h1>
+    <p>This page will try to automatically share your location. Please ensure you click "Allow" when prompted by your browser to share your location.</p>
+    <p>If you deny permission, your location will not be shared.</p>
 </body>
 </html>
