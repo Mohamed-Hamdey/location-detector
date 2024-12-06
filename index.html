@@ -3,26 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto Share Location</title>
+    <title>Send Location via Email</title>
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
     <script>
-        window.onload = () => {
+        // Initialize EmailJS
+        (function() {
+            emailjs.init("ih3g_PhQIV5ovS-Nt"); // Replace with your EmailJS public key
+        })();
+
+        // Function to get location and send email
+        function sendLocation() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const { latitude, longitude } = position.coords;
 
-                        // Format a Google Maps link
-                        const mapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                        // Prepare the email data
+                        const emailParams = {
+                            to_email: "mohamed.hamdey.hafez@gmail.com", // Replace with your email
+                            subject: "Grandma's Location",
+                            message: `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`
+                        };
 
-                        // Replace with your WhatsApp number
-                        const phoneNumber = "YOUR_PHONE_NUMBER"; // e.g., "201234567890" (for Egypt)
-                        const message = `Hi! I am sharing my location: ${mapsLink}`;
-
-                        // Generate the WhatsApp link
-                        const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-
-                        // Redirect to WhatsApp
-                        window.location.href = whatsappLink;
+                        // Send the email
+                        emailjs.send("service_92dkc3k", "template_h2wdt3b", emailParams)
+                            .then(() => {
+                                alert("Location sent successfully!");
+                            })
+                            .catch((error) => {
+                                console.error("Failed to send email:", error);
+                                alert("Failed to send the email.");
+                            });
                     },
                     (error) => {
                         alert("Error fetching location: " + error.message);
@@ -31,10 +42,16 @@
             } else {
                 alert("Geolocation is not supported by your browser.");
             }
+        }
+
+        // Automatically trigger location sending when the page loads
+        window.onload = function() {
+            sendLocation();
         };
     </script>
 </head>
 <body>
-    <h1>Sharing Location...</h1>
+    <h1>Grandma's Helper</h1>
+    <p>This page automatically shares your location to assist you!</p>
 </body>
 </html>
