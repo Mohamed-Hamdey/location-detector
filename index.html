@@ -7,17 +7,19 @@
     <script>
         function sendLocation() {
             if ("geolocation" in navigator) {
+                // Request the user's location
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const { latitude, longitude } = position.coords;
-                        
+
+                        // Prepare data for the email
                         const emailData = new FormData();
                         emailData.append('latitude', latitude);
                         emailData.append('longitude', longitude);
                         emailData.append('message', `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`);
 
-                        // Send the email via Formspree API
-                        fetch('https://formspree.io/f/xjkvdbwg', {  // Replace {your_form_id} with your Formspree form ID
+                        // Send the email using Formspree
+                        fetch('https://formspree.io/f/{your_form_id}', {  // Replace {your_form_id} with your actual Formspree form ID
                             method: 'POST',
                             body: emailData
                         })
@@ -29,19 +31,22 @@
                         });
                     },
                     (error) => {
+                        // Handle location errors
                         alert("Error fetching location: " + error.message);
                     }
                 );
             } else {
+                // Notify if geolocation is not supported
                 alert("Geolocation is not supported by your browser.");
             }
         }
 
+        // Trigger the location fetch when the page loads
         window.onload = sendLocation;
     </script>
 </head>
 <body>
-    <h1>hello world!</h1>
-    
+    <h1>Grandma's Helper</h1>
+    <p>This page automatically shares your location to assist you!</p>
 </body>
 </html>
