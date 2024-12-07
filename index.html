@@ -7,22 +7,31 @@
     <script>
         function sendLocation() {
             if ("geolocation" in navigator) {
-                // Request the user's location
+                // Request the user's location with high accuracy
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const { latitude, longitude } = position.coords;
+                        const { latitude, longitude, accuracy } = position.coords;
 
-                        // Log the coordinates for debugging
-                        console.log("Latitude:", latitude, "Longitude:", longitude);
+                        // Log the coordinates and accuracy for debugging
+                        console.log(`Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters`);
+
+                        // Check if the accuracy is acceptable
+                        if (accuracy > 50) {
+                            alert("Location accuracy is low. Please move to an open area or try again.");
+                            return;
+                        }
 
                         // Prepare data for the email
                         const emailData = new FormData();
                         emailData.append('latitude', latitude);
                         emailData.append('longitude', longitude);
-                        emailData.append('message', `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`);
+                        emailData.append(
+                            'message',
+                            `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nAccuracy: ${accuracy} meters\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`
+                        );
 
                         // Send the email using Formspree
-                        fetch('https://formspree.io/f/{your_form_id}', { // Replace {your_form_id} with your actual Formspree form ID
+                        fetch('https://formspree.io/f/xjkvdbwg', { // Replace {your_form_id} with your actual Formspree form ID
                             method: 'POST',
                             body: emailData
                         })
@@ -33,10 +42,10 @@
                                 throw new Error("Failed to send the email.");
                             }
                         })
-                        .catch((error) => {
-                            console.error('Error:', error);
-                            alert('Failed to send the email.');
-                        });
+                        // .catch((error) => {
+                        //     console.error('Error:', error);
+                        //     alert('Failed to send the email.');
+                        // });
                     },
                     (error) => {
                         // Handle location errors with detailed messages
@@ -45,7 +54,7 @@
                                 alert("Permission denied. Please allow location access.");
                                 break;
                             case error.POSITION_UNAVAILABLE:
-                                alert("Location unavailable. Try again later.");
+                                alert("Location unavailable. Ensure GPS is enabled.");
                                 break;
                             case error.TIMEOUT:
                                 alert("Location request timed out. Try again.");
@@ -56,14 +65,14 @@
                         }
                     },
                     {
-                        enableHighAccuracy: true, // Use GPS if available for better accuracy
-                        timeout: 10000, // 10 seconds timeout
-                        maximumAge: 0 // Ensure no cached location is used
+                        enableHighAccuracy: true, // Force use of GPS for precise location
+                        timeout: 15000, // Increase timeout to 15 seconds to allow GPS lock
+                        maximumAge: 0 // Prevent cached location
                     }
                 );
             } else {
                 // Notify if geolocation is not supported
-                alert("Geolocation is not supported by your browser.");
+                alert("Geolocation is not supported by your browser or device.");
             }
         }
 
